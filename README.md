@@ -21,7 +21,7 @@ npm install
 ```
 
 Next, open two terminals to run the web app client and microservice server at the same time.
-> Note: You must first clone and install the microservice to your local machine using the following commands::+1::
+> Note: You must first clone and install the microservice to your local machine using the following commands:+1::
 ```
 git clone https://github.com/thhuynh7/fragments.git
 npm install
@@ -39,7 +39,7 @@ Finally, you can access the web app client at the following URL in your web brow
 http://localhost:1234/
 ```
 
-> Note: You can observe your server responses using the following commands in the terminal::+1::
+> Note: You can observe your server responses using the following commands in the terminal:+1::
 ```
 curl -i localhost:8080
 ```
