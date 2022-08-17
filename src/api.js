@@ -5,16 +5,36 @@
 // const apiUrl = 'http://fragments-env.eba-qg6zifpm.us-east-1.elasticbeanstalk.com';
 const apiUrl = 'http://fragments-env.eba-qg6zifpm.us-east-1.elasticbeanstalk.com';
 
-/**
- * Given an authenticated user, request all fragments for this user from the
- * fragments microservice (currently only running locally). We expect a user
- * to have an `idToken` attached, so we can send that along with the request.
- */
 export async function getUserFragments(user) {
 
-  let fragment;
-  let fragments;
+  let ul = document.querySelector('ul');
+  let h3 = document.querySelector('h3');
 
+  console.log('Requesting user fragments data...');
+  try {
+    const res = await fetch(`${apiUrl}/v1/fragments`, {
+      // Generate headers with the proper Authorization bearer token to pass
+      headers: user.authorizationHeaders(),
+    });
+    if (!res.ok) {
+      throw new Error(`${res.status} ${res.statusText}`);
+    }
+    const data = await res.json();
+    console.log('Got user fragments data', { data });
+    
+    h3.innerHTML = `You have ${data.fragments.length} existing fragment(s):`;
+
+    for (var i = 0; i < data.fragments.length; i++) { 
+      let li = document.createElement('li')
+      ul.appendChild(li).innerHTML = data.fragments[i]; 
+    }
+
+  } catch (err) {
+    console.error('Unable to call GET /v1/fragment', { err });
+  }
+}
+
+export async function postUserFragment(user) {
   console.log('Posting a new text fragment...');
   try {
     const res = await fetch(`${apiUrl}/v1/fragments`, {
@@ -33,10 +53,14 @@ export async function getUserFragments(user) {
   } catch (err) {
     console.error('Unable to call POST /v1/fragment', { err });
   }
+}
 
-  console.log('Requesting user fragments data...');
+export async function deleteUserFragment(user, x) {
+  console.log('Deleting a fragment...');
   try {
-    const res = await fetch(`${apiUrl}/v1/fragments`, {
+    const res = await fetch(`${apiUrl}/v1/fragments/${x}`, {
+      method: "POST",
+      // body: "This is a fragment",
       // Generate headers with the proper Authorization bearer token to pass
       headers: user.authorizationHeaders(),
     });
@@ -44,8 +68,59 @@ export async function getUserFragments(user) {
       throw new Error(`${res.status} ${res.statusText}`);
     }
     const data = await res.json();
-    console.log('Got user fragments data', { data });
-    alert(`** New Fragment created: ${fragment} ** Fragments of current user: ${data.fragments}`);
+    console.log('New fragment posted', { data });
+    // alert(`${data.fragment.id} created`);
+    fragment = data.fragment.id;
+  } catch (err) {
+    console.error('Unable to call POST /v1/fragment', { err });
+  }
+}
+
+
+//////////////
+export async function getFragmentMetadata(user, fragmentId) {
+
+  let ol = document.querySelector('ol');
+  let h4 = document.querySelector('h4');
+
+  console.log('Requesting user fragments data...');
+  try {
+    const res = await fetch(`${apiUrl}/v1/fragments/${fragmentId}/info`, {
+      // Generate headers with the proper Authorization bearer token to pass
+      headers: user.authorizationHeaders(),
+    });
+    if (!res.ok) {
+      throw new Error(`${res.status} ${res.statusText}`);
+    }
+    const data = await res.json();
+    console.log('Got user fragments info', { data });
+    
+    h4.innerHTML = `Metadata for the Fragment ${fragmentId}:`;
+    
+    {
+      let li = document.createElement('li')
+      ol.appendChild(li).innerHTML = `id: ${data.fragments.id}`;
+    }
+    {
+      let li = document.createElement('li')
+      ol.appendChild(li).innerHTML = `Created: ${data.fragments.created}`;
+    }
+    {
+      let li = document.createElement('li')
+      ol.appendChild(li).innerHTML = `OwnerId: ${data.fragments.ownerId}`;
+    }
+    {
+      let li = document.createElement('li')
+      ol.appendChild(li).innerHTML = `Updated: ${data.fragments.updated}`;
+    }
+    {
+      let li = document.createElement('li')
+      ol.appendChild(li).innerHTML = `Size: ${data.fragments.size}`;
+    }
+    {
+      let li = document.createElement('li')
+      ol.appendChild(li).innerHTML = `Type: ${data.fragments.type}`;
+    }
   } catch (err) {
     console.error('Unable to call GET /v1/fragment', { err });
   }
